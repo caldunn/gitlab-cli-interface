@@ -8,9 +8,11 @@ import (
 	"net/http"
 	"os"
 )
+
 var (
 	onlyReadAccessToken = "zysUgfeijUX_-zNWGxeZ"
 )
+
 func AllIssues() {
 	transportConfig := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
