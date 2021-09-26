@@ -1,0 +1,6 @@
+gitlab-connection:
+  base: "https://gitlab.localhost:9000"
+  allow-insecure-cert: true   # boolean
+
+  access-token:
+    read-only: 123456qwerty
