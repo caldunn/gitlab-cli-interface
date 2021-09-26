@@ -3,6 +3,7 @@ package http
 import (
 	"crypto/tls"
 	"fmt"
+	config2 "gitlab-cli-interface/config"
 	"gitlab-cli-interface/http/structs"
 	"io"
 	"net/http"
@@ -10,16 +11,26 @@ import (
 )
 
 var (
-	onlyReadAccessToken = "zysUgfeijUX_-zNWGxeZ"
+	onlyReadAccessToken string
 )
 
 func AllIssues() {
+	// Get the global config object.
+	configuration := config2.GetConfig()
+	onlyReadAccessToken = configuration.GitlabConnection.AccessTokens.ReadOnly
+
 	transportConfig := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: configuration.GitlabConnection.AllowInsecure,
+		},
 	}
 	client := &http.Client{Transport: transportConfig}
 
-	request, err := http.NewRequest("GET", "https://localhost:9010/api/v4/issues", nil)
+	request, err := http.NewRequest(
+		"GET",
+		fmt.Sprintf("%v/api/v4/issues", configuration.GitlabConnection.Base),
+		nil,
+	)
 	request.Header.Add("PRIVATE-TOKEN", onlyReadAccessToken)
 
 	if err != nil {
@@ -29,8 +40,14 @@ func AllIssues() {
 
 	response, err := client.Do(request)
 	if err != nil {
-		fmt.Println(err.Error())
+		fmt.Printf("---ERROR---\n%v\n-----------", err.Error())
+		return
 	}
+
+	if response.StatusCode != 200 {
+		fmt.Printf("An invalid response was received from GitLab\n%v", response.Status)
+	}
+
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
