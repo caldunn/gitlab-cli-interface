@@ -45,7 +45,7 @@ func AllIssues() {
 	}
 
 	if response.StatusCode != 200 {
-		fmt.Printf("An invalid response was received from GitLab\n%v", response.Status)
+		fmt.Printf("An invalid response was received from GitLab\n%v\n", response.Status)
 	}
 
 	defer func(Body io.ReadCloser) {
@@ -61,7 +61,13 @@ func AllIssues() {
 		outStr := issue.GenericCSVRow()
 		fmt.Println(outStr)
 	}
-	outFile, _ := os.Create("output.csv")
-	defer outFile.Close()
-	issues.MarshalCSV(outFile)
+
+	if len(issues) != 0 {
+		outFile, _ := os.Create("output.csv")
+		defer outFile.Close()
+		issues.MarshalCSV(outFile)
+	} else {
+		fmt.Print("\n\nNo issues exported. Please check permissions.\n\n")
+	}
+
 }
